@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Tracker</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            text-align: center;
+            padding: 5px;
+        }
+        .sl { background-color: red; }
+        .el { background-color: yellow; }
+        .vl { background-color: blue; }
+        .buvl { background-color: green; }
+    </style>
+</head>
+<body>
+
+<h2>Leave Tracker for 2025</h2>
+
+<div id="tables-container"></div>
+
+<script>
+    const months = [
+        { name: 'January', days: 31 },
+        { name: 'February', days: 28 }, // Adjust for leap years if needed
+        { name: 'March', days: 31 },
+        { name: 'April', days: 30 },
+        { name: 'May', days: 31 },
+        { name: 'June', days: 30 },
+        { name: 'July', days: 31 },
+        { name: 'August', days: 31 },
+        { name: 'September', days: 30 },
+        { name: 'October', days: 31 },
+        { name: 'November', days: 30 },
+        { name: 'December', days: 31 }
+    ];
+
+    const employees = [
+        {name: 'Aldrin Bonayog', leaves: []},
+        {name: 'James Michael Sedurifa', leaves: []},
+        {name: 'Jennielyn Martin', leaves: []},
+        {name: 'Emma Calangi', leaves: []},
+        {name: 'Aljon DeVyra', leaves: []},
+        {name: 'Jon Paolo Cesar', leaves: []},
+        {name: 'Josephine Kaye Lorenzo-Garcia', leaves: []},
+        {name: 'Kim Irvin Silva', leaves: []},
+        {name: 'Paul Joseph Gunio', leaves: []},
+        {name: 'Maribel Amado Padual', leaves: []},
+        {name: 'Thomas Molina', leaves: []},
+        {name: 'Romerick Argente', leaves: []},
+        {name: 'Francis Glenn Perez', leaves: []},
+        {name: 'Jerome Castillo', leaves: []},
+        {name: 'Carol Tablete Montero', leaves: []},
+        {name: 'Cheryl Love Casagnap', leaves: []}
+    ];
+
+    function createTable(month, days) {
+        const table = document.createElement('table');
+        const headerRow1 = document.createElement('tr');
+        const headerRow2 = document.createElement('tr');
+
+        headerRow1.innerHTML = `<th rowspan="2">Employee Name</th><th colspan="${days}">Days</th><th colspan="4">Total</th>`;
+        table.appendChild(headerRow1);
+
+        for (let i = 1; i <= days; i++) {
+            const dayCell = document.createElement('td');
+            dayCell.textContent = i;
+            headerRow2.appendChild(dayCell);
+        }
+        headerRow2.innerHTML += `<th>SL</th><th>EL</th><th>VL</th><th>BUVL</th>`;
+        table.appendChild(headerRow2);
+
+        employees.forEach(employee => {
+            const row = document.createElement('tr');
+            const nameCell = document.createElement('td');
+            nameCell.textContent = employee.name;
+            row.appendChild(nameCell);
+
+            for (let i = 1; i <= days; i++) {
+                const dayCell = document.createElement('td');
+                dayCell.contentEditable = true;
+                dayCell.dataset.day = i;
+                dayCell.dataset.month = month.name;
+                row.appendChild(dayCell);
+            }
+
+            row.innerHTML += `<td class="total-sl">0</td><td class="total-el">0</td><td class="total-vl">0</td><td class="total-buvl">0</td>`;
+            table.appendChild(row);
+        });
+
+        return table;
+    }
+
+    function addTables() {
+        const container = document.getElementById('tables-container');
+        months.forEach(month => {
+            const monthHeader = document.createElement('h3');
+            monthHeader.textContent = month.name;
+            container.appendChild(monthHeader);
+            container.appendChild(createTable(month, month.days));
+        });
+    }
+
+    addTables();
+
+    function updateTotals() {
+        const tables = document.querySelectorAll('table');
+        tables.forEach(table => {
+            const rows = table.querySelectorAll('tr');
+            rows.forEach(row => {
+                let totalSL = 0;
+                let totalEL = 0;
+                let totalVL = 0;
+                let totalBUVL = 0;
+
+                row.querySelectorAll('td').forEach(td => {
+                    if (td.classList.contains('sl')) {
+                        totalSL += parseFloat(td.textContent.trim().replace('SL', '')) || 1;
+                    } else if (td.classList.contains('el')) {
+                        totalEL += parseFloat(td.textContent.trim().replace('EL', '')) || 1;
+                    } else if (td.classList.contains('vl')) {
+                        totalVL += parseFloat(td.textContent.trim().replace('VL', '')) || 1;
+                    } else if (td.classList.contains('buvl')) {
+                        totalBUVL += parseFloat(td.textContent.trim().replace('BUVL', '')) || 1;
+                    }
+                });
+
+                const totalSLCell = row.querySelector('.total-sl');
+                const totalELCell = row.querySelector('.total-el');
+                const totalVLCell = row.querySelector('.total-vl');
+                const totalBUVLCell = row.querySelector('.total-buvl');
+                if (totalSLCell) totalSLCell.textContent = totalSL;
+                if (totalELCell) totalELCell.textContent = totalEL;
+                if (totalVLCell) totalVLCell.textContent = totalVL;
+                if (totalBUVLCell) totalBUVLCell.textContent = totalBUVL;
+                console.log(`Totals updated: SL=${totalSL}, EL=${totalEL}, VL=${totalVL}, BUVL=${totalBUVL}`);
+            });
+        });
+    }
+
+    document.addEventListener('input', function(event) {
+        const cell = event.target;
+        if (cell.tagName === 'TD' && cell.contentEditable === 'true') {
+            const value = cell.textContent.trim().toUpperCase();
+            cell.className = '';
+            if (value.startsWith('SL')) {
+                cell.classList.add('sl');
+            } else if (value.startsWith('EL')) {
+                cell.classList.add('el');
+            } else if (value.startsWith('VL')) {
+                cell.classList.add('vl');
+            } else if (value.startsWith('BUVL')) {
+                cell.classList.add('buvl');
+            }
+            console.log(`Class assigned: ${cell.className}`);
+            updateTotals();
+        }
+    });
+</script>
+
+</body>
+</html>
